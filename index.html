@@ -7,9 +7,9 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>PRIVEX | تقييمات التجار</title>
 <meta name="description" content="PRIVEX - ابحث عن التاجر وشوف تقييمات العملاء الحقيقية قبل ما تتعامل.">
-<link rel="icon" href="privex.jpg">
+<link rel="icon" href="assets/privex.jpg">
 <style>
-  @font-face{font-family:PX;src:url(font.ttf);font-display:swap}
+  @font-face{font-family:PX;src:url(assets/font.ttf);font-display:swap}
   :root{
     --bg:#070604;--card:#120e04;--card2:#1a1406;--line:#3a2d0c;
     --txt:#f6f1e3;--sub:#a99a72;--gold:#d4af37;--gold-lt:#f0cd64;--gold-dk:#785a14;
@@ -78,6 +78,7 @@
   }
   .profile::before{content:"";position:absolute;inset:6px;border:1px solid var(--gold-dk);border-radius:19px;pointer-events:none}
   .p-head{display:flex;align-items:center;gap:14px}
+  .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
   .p-head .av{width:64px;height:64px;font-size:26px}
   .p-name{font-size:22px;font-weight:700}
   .p-sub{color:var(--gold-lt);font-size:13px;margin-top:2px;letter-spacing:1px}
@@ -128,7 +129,7 @@
 
 <div class="wrap">
   <div class="top">
-    <a class="brand" href="./"><img src="privex.jpg" alt="PRIVEX"><span>PRIVEX</span></a>
+    <a class="brand" href="./"><img src="assets/privex.jpg" alt="PRIVEX"><span>PRIVEX</span></a>
     <span class="tag">تقييمات التجار</span>
   </div>
 
@@ -183,6 +184,17 @@ const $ = id => document.getElementById(id);
 const initial = (name, un) => ((name || un || "?").trim()[0] || "?").toUpperCase();
 const MSG_SEARCH = "🔍 <b>ابحث عن التاجر</b><br>اكتب يوزره أو اسمه فوق عشان تشوف تقييماته على PRIVEX.";
 
+const LOGO = "assets/privex.jpg";
+function setAv(box, m) {
+  box.textContent = "";
+  const img = new Image();
+  img.alt = "";
+  let fell = false;
+  img.onerror = () => { if (!fell) { fell = true; img.src = LOGO; } };
+  img.src = m.avatar || LOGO;
+  box.style.background = "none";
+  box.append(img);
+}
 function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -200,10 +212,29 @@ function starsEl(n) {
 let STATIC = null;           // null = لسه معرفناش، true = data.json، false = API
 let DB = null;
 async function loadStatic() {
-  const r = await fetch("data.json?t=" + Math.floor(Date.now() / 30000), { cache: "no-store" });
-  if (!r.ok) throw new Error("no data.json");
+  /* الأسرع: نقرأ data.json مباشرة من GitHub API (بيتحدّث لحظياً بدون انتظار بناء الموقع)،
+     ولو فشل (حد الطلبات مثلاً) نرجع لنسخة الموقع العادية. */
+  let r = null;
+  const host = location.hostname.match(/^(.+)\.github\.io$/);
+  const repo = location.pathname.split("/")[1];
+  if (host && repo && repo.indexOf(".") < 0) {
+    try {
+      r = await fetch("https://api.github.com/repos/" + host[1] + "/" + repo + "/contents/data.json",
+                      { headers: { Accept: "application/vnd.github.raw+json" }, cache: "no-cache" });
+      if (!r.ok) r = null;
+    } catch (e) { r = null; }
+  }
+  if (!r) {
+    r = await fetch("data.json?t=" + Math.floor(Date.now() / 10000), { cache: "no-store" });
+    if (!r.ok) throw new Error("no data.json");
+  }
   DB = await r.json();
   STATIC = true;
+  lastLoad = Date.now();
+}
+let lastLoad = 0;
+async function freshData(maxAge) {      // يحدّث البيانات لو أقدم من maxAge ملّي ثانية
+  if (STATIC && Date.now() - lastLoad > maxAge) { try { await loadStatic(); } catch (e) {} }
 }
 async function apiGet(path) {
   const r = await fetch(path, { cache: "no-store" });
@@ -217,23 +248,24 @@ async function ensureMode() {
 const norm = v => String(v || "").trim().replace(/^@/, "").toLowerCase();
 async function getMerchants(q) {
   await ensureMode();
+  await freshData(5000);
   if (!STATIC) return apiGet("api/merchants?q=" + encodeURIComponent(q));
   const k = norm(q);
   const items = DB.merchants
     .filter(m => !k || norm(m.username).includes(k) || norm(m.name).includes(k))
     .sort((a, b) => b.count - a.count || b.avg - a.avg)
     .slice(0, 50)
-    .map(m => ({ id: m.id, username: m.username, name: m.name, count: m.count, avg: m.avg }));
+    .map(m => ({ id: m.id, username: m.username, name: m.name, avatar: m.avatar, count: m.count, avg: m.avg }));
   return { items };
 }
 async function getMerchant(key) {
   await ensureMode();
-  if (STATIC) { try { await loadStatic(); } catch (e) {} }   // أحدث نسخة
+  await freshData(3000);   // أحدث نسخة
   if (!STATIC) return apiGet("api/merchant?id=" + encodeURIComponent(key));
   const k = norm(key);
   const m = DB.merchants.find(x => String(x.id) === k || norm(x.username) === k);
   if (!m) { const e = new Error("not found"); e.status = 404; throw e; }
-  return { merchant: { id: m.id, username: m.username, name: m.name, count: m.count, avg: m.avg },
+  return { merchant: { id: m.id, username: m.username, name: m.name, avatar: m.avatar, count: m.count, avg: m.avg },
            dist: m.dist, ratings: m.ratings };
 }
 function state(box, html) { const d = el("div", "state"); d.innerHTML = html; box.replaceChildren(d); }
@@ -260,7 +292,7 @@ async function search(q) {
     }
     box.replaceChildren(...data.items.map(m => {
       const c = el("div", "card");
-      c.append(el("div", "av", initial(m.name, m.username)));
+      const av = el("div", "av"); setAv(av, m); c.append(av);
       const info = el("div", "info");
       info.append(el("div", "nm", m.name || (m.username ? "@" + m.username : "تاجر")));
       if (m.username) info.append(el("div", "un", "@" + m.username));
@@ -272,22 +304,26 @@ async function search(q) {
       c.onclick = () => open(m.id, true);
       return c;
     }));
-  } catch (e) { if (my === seq) state(box, "حصلت مشكلة في التحميل، جرّب تاني."); }
+  } catch (e) { if (my === seq) state(box, STATIC === false ? "بيانات التجار لسه مترفعتش على الموقع (data.json مش موجود).<br>لازم البوت يرفعها الأول." : "حصلت مشكلة في التحميل، جرّب تاني."); }
 }
 
 /* ---------- صفحة التاجر ---------- */
-async function open(key, push) {
-  showView("merchant");
-  state($("revs"), "جاري التحميل...");
-  $("dName").textContent = ""; $("dUser").textContent = ""; $("dAv").textContent = "";
-  $("dAvg").textContent = "—"; $("dStars").replaceChildren(); $("dCnt").textContent = ""; $("dDist").replaceChildren();
-  $("secCnt").textContent = "";
+let curKey = null;
+async function open(key, push, silent) {
+  curKey = key;
+  if (!silent) {
+    showView("merchant");
+    state($("revs"), "جاري التحميل...");
+    $("dName").textContent = ""; $("dUser").textContent = ""; $("dAv").textContent = ""; $("dAv").style.background = "";
+    $("dAvg").textContent = "—"; $("dStars").replaceChildren(); $("dCnt").textContent = ""; $("dDist").replaceChildren();
+    $("secCnt").textContent = "";
+  }
   try {
     const d = await getMerchant(key);
     const m = d.merchant;
     if (push) history.pushState({ m: m.id }, "", location.pathname + "?m=" + m.id);
     document.title = "PRIVEX | " + (m.name || (m.username ? "@" + m.username : "تاجر"));
-    $("dAv").textContent = initial(m.name, m.username);
+    setAv($("dAv"), m);
     $("dName").textContent = m.name || (m.username ? "@" + m.username : "تاجر");
     $("dUser").textContent = m.username ? "@" + m.username : "";
     $("dAvg").textContent = m.count ? m.avg.toFixed(1) : "—";
@@ -313,7 +349,7 @@ async function open(key, push) {
     }));
   } catch (e) {
     if (e.status === 404) state($("revs"), "التاجر ده مش موجود على <b>PRIVEX</b>.<br>جرّب تبحث عنه بالاسم.");
-    else state($("revs"), "حصلت مشكلة في التحميل، جرّب تاني.");
+    else state($("revs"), STATIC === false ? "بيانات التجار لسه مترفعتش على الموقع (data.json مش موجود)." : "حصلت مشكلة في التحميل، جرّب تاني.");
   }
 }
 
@@ -331,6 +367,12 @@ if (tg && tg.BackButton) tg.BackButton.onClick(() => home(true));
 let timer;
 $("q").addEventListener("input", e => { clearTimeout(timer); timer = setTimeout(() => search(e.target.value), 250); });
 window.addEventListener("popstate", route);
+/* تحديث تلقائي كل 15 ثانية والصفحة مفتوحة */
+setInterval(() => {
+  if (document.hidden) return;
+  if (!$("merchantView").classList.contains("hidden")) { if (curKey) open(curKey, false, true); }
+  else search($("q").value);
+}, 15000);
 
 function route() {
   const p = new URLSearchParams(location.search);
