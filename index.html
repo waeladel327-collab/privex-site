@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0802">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>PRIVEX | تقييمات التجار</title>
+<meta name="description" content="PRIVEX - ابحث عن التاجر وشوف تقييمات العملاء الحقيقية قبل ما تتعامل.">
+<link rel="icon" href="privex.jpg">
+<style>
+  @font-face{font-family:PX;src:url(font.ttf);font-display:swap}
+  :root{
+    --bg:#070604;--card:#120e04;--card2:#1a1406;--line:#3a2d0c;
+    --txt:#f6f1e3;--sub:#a99a72;--gold:#d4af37;--gold-lt:#f0cd64;--gold-dk:#785a14;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:var(--bg)}
+  body{
+    margin:0;min-height:100vh;color:var(--txt);
+    font-family:PX,system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+    background:
+      radial-gradient(900px 500px at 110% -10%,rgba(212,175,55,.22),transparent 60%),
+      radial-gradient(700px 400px at -10% 110%,rgba(150,112,22,.18),transparent 60%),
+      var(--bg);
+    padding:0 16px calc(36px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:640px;margin:0 auto}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:16px 0 4px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:3px;color:var(--gold-lt);font-size:18px;text-decoration:none}
+  .brand img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
+  .tag{font-size:12px;color:var(--sub);letter-spacing:.5px}
+
+  /* الختم */
+  .stamp{width:120px;height:120px;transform:rotate(14deg);filter:drop-shadow(0 6px 18px rgba(212,175,55,.35));flex:none}
+  .stamp.sm{width:64px;height:64px}
+
+  .hero{text-align:center;padding:34px 0 10px}
+  .hero .stamp{margin:0 auto 14px}
+  .hero h1{margin:0 0 8px;font-size:30px;line-height:1.3;
+    background:linear-gradient(90deg,var(--gold-lt),var(--gold),var(--gold-lt));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{margin:0 auto;color:var(--sub);font-size:15px;max-width:420px;line-height:1.8}
+
+  .search{position:relative;margin:22px 0 14px}
+  .search input{
+    width:100%;padding:16px 18px;border-radius:16px;border:1.5px solid var(--gold-dk);
+    background:var(--card);color:var(--txt);font:inherit;font-size:17px;outline:none;direction:rtl;
+    box-shadow:0 0 0 0 rgba(212,175,55,0);transition:.2s
+  }
+  .search input::placeholder{color:#7d6f4c}
+  .search input:focus{border-color:var(--gold-lt);box-shadow:0 0 0 4px rgba(212,175,55,.15)}
+
+  .state{text-align:center;color:var(--sub);padding:34px 12px;line-height:1.9}
+  .state b{color:var(--gold-lt)}
+
+  .card{
+    display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,var(--card),var(--card2));
+    border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px;cursor:pointer;transition:.15s
+  }
+  .card:hover,.card:active{border-color:var(--gold);transform:translateY(-1px)}
+  .av{width:48px;height:48px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:20px;color:#1a1204;background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));
+    border:2px solid var(--gold-lt)}
+  .info{flex:1;min-width:0}
+  .nm{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .un{color:var(--sub);font-size:13px;direction:ltr;text-align:right}
+  .rt{text-align:left;flex:none}
+  .stars{color:var(--gold-lt);letter-spacing:2px;font-size:15px;white-space:nowrap}
+  .stars .off{color:#4a3a12}
+  .cnt{color:var(--sub);font-size:12px;margin-top:2px}
+
+  /* صفحة التاجر */
+  .back{background:none;border:none;color:var(--gold);font:inherit;font-size:15px;padding:12px 2px;cursor:pointer}
+  .profile{
+    position:relative;overflow:hidden;border-radius:24px;padding:22px 18px;margin-top:4px;
+    border:2px solid var(--gold);
+    background:linear-gradient(135deg,#0a0802 0%,#2b200a 55%,#7c5d14 140%);
+  }
+  .profile::before{content:"";position:absolute;inset:6px;border:1px solid var(--gold-dk);border-radius:19px;pointer-events:none}
+  .p-head{display:flex;align-items:center;gap:14px}
+  .p-head .av{width:64px;height:64px;font-size:26px}
+  .p-name{font-size:22px;font-weight:700}
+  .p-sub{color:var(--gold-lt);font-size:13px;margin-top:2px;letter-spacing:1px}
+  .p-un{color:var(--sub);font-size:13px;direction:ltr;text-align:right;margin-top:2px}
+  .p-body{display:flex;align-items:center;gap:18px;margin-top:18px;padding-top:16px;border-top:1px solid var(--gold-dk)}
+  .avg{font-size:56px;font-weight:700;color:var(--gold-lt);line-height:1}
+  .avg small{font-size:20px;color:var(--gold)}
+  .dist{flex:1;min-width:0}
+  .bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);margin:3px 0}
+  .bar i{flex:1;height:7px;border-radius:5px;background:#2a1f08;overflow:hidden;display:block}
+  .bar i u{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt));border-radius:5px}
+  .bar span{width:16px;text-align:center}
+  .bar em{width:24px;font-style:normal;text-align:left}
+  .p-stamp{margin-right:auto;width:78px;height:78px}
+
+  .sec{margin:22px 2px 10px;color:var(--gold);font-weight:700;font-size:15px;display:flex;justify-content:space-between}
+  .rev{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 15px;margin-bottom:9px}
+  .rev .tp{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+  .rev .w{font-size:16px;word-break:break-word;line-height:1.7}
+  .rev .d{color:var(--sub);font-size:12px}
+  .other{display:block;width:100%;margin-top:14px;padding:14px;border-radius:14px;border:1.5px solid var(--gold-dk);
+    background:transparent;color:var(--gold-lt);font:inherit;font-size:15px;cursor:pointer}
+  .other:hover{border-color:var(--gold-lt)}
+  .foot{text-align:center;color:#6f6240;font-size:12px;margin-top:30px;letter-spacing:2px}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="seal" viewBox="0 0 300 300">
+      <circle cx="150" cy="150" r="140" fill="none" stroke="#f0cd64" stroke-width="8"/>
+      <circle cx="150" cy="150" r="120" fill="none" stroke="#d4af37" stroke-width="3"/>
+      <circle cx="150" cy="150" r="104" fill="#1e1604" fill-opacity=".92" stroke="#f0cd64" stroke-width="3"/>
+      <defs><path id="st" d="M0-12 3.5-3.7 12-3.7 5.2 1.5 7.4 10 0 5 -7.4 10 -5.2 1.5 -12-3.7 -3.5-3.7Z"/></defs>
+      <g fill="#f0cd64">
+        <use href="#st" transform="translate(70 84)"/><use href="#st" transform="translate(110 84)"/>
+        <use href="#st" transform="translate(150 84)"/><use href="#st" transform="translate(190 84)"/>
+        <use href="#st" transform="translate(230 84)"/>
+        <use href="#st" transform="translate(70 216)"/><use href="#st" transform="translate(110 216)"/>
+        <use href="#st" transform="translate(150 216)"/><use href="#st" transform="translate(190 216)"/>
+        <use href="#st" transform="translate(230 216)"/>
+      </g>
+      <text x="150" y="162" text-anchor="middle" font-family="PX,Arial,sans-serif" font-weight="700" font-size="50" fill="#f0cd64" letter-spacing="2">PRIVEX</text>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="./"><img src="privex.jpg" alt="PRIVEX"><span>PRIVEX</span></a>
+    <span class="tag">تقييمات التجار</span>
+  </div>
+
+  <!-- الصفحة الرئيسية: بحث -->
+  <div id="homeView">
+    <div class="hero">
+      <svg class="stamp"><use href="#seal"/></svg>
+      <h1>PRIVEX<br>تقييمات التجار</h1>
+      <p>اكتب يوزر التاجر أو اسمه وشوف تقييمات العملاء الحقيقية على <b style="color:var(--gold-lt)">PRIVEX</b> قبل ما تتعامل.</p>
+    </div>
+    <div class="search">
+      <input id="q" type="search" placeholder="ابحث عن التاجر — مثلاً @username" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <div id="list"></div>
+  </div>
+
+  <!-- صفحة التاجر -->
+  <div id="merchantView" class="hidden">
+    <button class="back" id="backBtn">→ رجوع للبحث</button>
+    <div class="profile">
+      <div class="p-head">
+        <div class="av" id="dAv"></div>
+        <div>
+          <div class="p-name" id="dName"></div>
+          <div class="p-sub">تاجر في PRIVEX</div>
+          <div class="p-un" id="dUser"></div>
+        </div>
+        <svg class="stamp sm p-stamp"><use href="#seal"/></svg>
+      </div>
+      <div class="p-body">
+        <div>
+          <div class="avg"><span id="dAvg"></span><small>/5</small></div>
+          <div class="stars" id="dStars" style="margin-top:6px"></div>
+          <div class="cnt" id="dCnt"></div>
+        </div>
+        <div class="dist" id="dDist"></div>
+      </div>
+    </div>
+    <div class="sec"><span>تقييمات العملاء</span><span id="secCnt"></span></div>
+    <div id="revs"></div>
+    <button class="other" id="otherBtn">🔍 ابحث عن تاجر آخر</button>
+  </div>
+
+  <div class="foot">PRIVEX · PRIVEX · PRIVEX</div>
+</div>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
+
+const $ = id => document.getElementById(id);
+const initial = (name, un) => ((name || un || "?").trim()[0] || "?").toUpperCase();
+const MSG_SEARCH = "🔍 <b>ابحث عن التاجر</b><br>اكتب يوزره أو اسمه فوق عشان تشوف تقييماته على PRIVEX.";
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function starsEl(n) {
+  const s = el("span", "stars");
+  const r = Math.round(n);
+  s.append("★".repeat(r));
+  if (r < 5) s.append(Object.assign(el("span", "off"), { textContent: "★".repeat(5 - r) }));
+  return s;
+}
+/* مصدر البيانات: data.json (بيرفعه البوت على GitHub Pages) أو واجهة البوت /api لو الموقع شغال من البوت نفسه */
+let STATIC = null;           // null = لسه معرفناش، true = data.json، false = API
+let DB = null;
+async function loadStatic() {
+  const r = await fetch("data.json?t=" + Math.floor(Date.now() / 30000), { cache: "no-store" });
+  if (!r.ok) throw new Error("no data.json");
+  DB = await r.json();
+  STATIC = true;
+}
+async function apiGet(path) {
+  const r = await fetch(path, { cache: "no-store" });
+  if (!r.ok) { const e = new Error("http " + r.status); e.status = r.status; throw e; }
+  return r.json();
+}
+async function ensureMode() {
+  if (STATIC !== null) return;
+  try { await loadStatic(); } catch (e) { STATIC = false; }
+}
+const norm = v => String(v || "").trim().replace(/^@/, "").toLowerCase();
+async function getMerchants(q) {
+  await ensureMode();
+  if (!STATIC) return apiGet("api/merchants?q=" + encodeURIComponent(q));
+  const k = norm(q);
+  const items = DB.merchants
+    .filter(m => !k || norm(m.username).includes(k) || norm(m.name).includes(k))
+    .sort((a, b) => b.count - a.count || b.avg - a.avg)
+    .slice(0, 50)
+    .map(m => ({ id: m.id, username: m.username, name: m.name, count: m.count, avg: m.avg }));
+  return { items };
+}
+async function getMerchant(key) {
+  await ensureMode();
+  if (STATIC) { try { await loadStatic(); } catch (e) {} }   // أحدث نسخة
+  if (!STATIC) return apiGet("api/merchant?id=" + encodeURIComponent(key));
+  const k = norm(key);
+  const m = DB.merchants.find(x => String(x.id) === k || norm(x.username) === k);
+  if (!m) { const e = new Error("not found"); e.status = 404; throw e; }
+  return { merchant: { id: m.id, username: m.username, name: m.name, count: m.count, avg: m.avg },
+           dist: m.dist, ratings: m.ratings };
+}
+function state(box, html) { const d = el("div", "state"); d.innerHTML = html; box.replaceChildren(d); }
+function showView(name) {
+  $("homeView").classList.toggle("hidden", name !== "home");
+  $("merchantView").classList.toggle("hidden", name !== "merchant");
+  if (tg && tg.BackButton) { name === "merchant" ? tg.BackButton.show() : tg.BackButton.hide(); }
+  window.scrollTo(0, 0);
+}
+
+/* ---------- البحث ---------- */
+let seq = 0;
+async function search(q) {
+  q = (q || "").trim();
+  const box = $("list");
+  if (!q) { state(box, MSG_SEARCH); return; }
+  const my = ++seq;
+  try {
+    const data = await getMerchants(q);
+    if (my !== seq) return;
+    if (!data.items.length) {
+      state(box, "مفيش تاجر بالاسم ده على <b>PRIVEX</b> 🤷<br>اتأكد من اليوزر وجرّب تاني.");
+      return;
+    }
+    box.replaceChildren(...data.items.map(m => {
+      const c = el("div", "card");
+      c.append(el("div", "av", initial(m.name, m.username)));
+      const info = el("div", "info");
+      info.append(el("div", "nm", m.name || (m.username ? "@" + m.username : "تاجر")));
+      if (m.username) info.append(el("div", "un", "@" + m.username));
+      c.append(info);
+      const rt = el("div", "rt");
+      rt.append(m.count ? starsEl(m.avg) : el("span", "stars", "☆☆☆☆☆"));
+      rt.append(el("div", "cnt", m.count + " تقييم"));
+      c.append(rt);
+      c.onclick = () => open(m.id, true);
+      return c;
+    }));
+  } catch (e) { if (my === seq) state(box, "حصلت مشكلة في التحميل، جرّب تاني."); }
+}
+
+/* ---------- صفحة التاجر ---------- */
+async function open(key, push) {
+  showView("merchant");
+  state($("revs"), "جاري التحميل...");
+  $("dName").textContent = ""; $("dUser").textContent = ""; $("dAv").textContent = "";
+  $("dAvg").textContent = "—"; $("dStars").replaceChildren(); $("dCnt").textContent = ""; $("dDist").replaceChildren();
+  $("secCnt").textContent = "";
+  try {
+    const d = await getMerchant(key);
+    const m = d.merchant;
+    if (push) history.pushState({ m: m.id }, "", location.pathname + "?m=" + m.id);
+    document.title = "PRIVEX | " + (m.name || (m.username ? "@" + m.username : "تاجر"));
+    $("dAv").textContent = initial(m.name, m.username);
+    $("dName").textContent = m.name || (m.username ? "@" + m.username : "تاجر");
+    $("dUser").textContent = m.username ? "@" + m.username : "";
+    $("dAvg").textContent = m.count ? m.avg.toFixed(1) : "—";
+    $("dStars").replaceChildren(m.count ? starsEl(m.avg) : "");
+    $("dCnt").textContent = m.count + " تقييم";
+    $("secCnt").textContent = m.count ? m.count + " تقييم" : "";
+    const dist = d.dist || {};
+    const max = Math.max(1, ...[1, 2, 3, 4, 5].map(i => dist[i] || 0));
+    $("dDist").replaceChildren(...[5, 4, 3, 2, 1].map(i => {
+      const row = el("div", "bar");
+      const fill = el("u"); fill.style.width = ((dist[i] || 0) / max * 100) + "%";
+      const track = el("i"); track.append(fill);
+      row.append(el("span", "", String(i)), track, el("em", "", String(dist[i] || 0)));
+      return row;
+    }));
+    if (!d.ratings.length) { state($("revs"), "لسه مفيش تقييمات للتاجر ده."); return; }
+    $("revs").replaceChildren(...d.ratings.map(r => {
+      const c = el("div", "rev");
+      const tp = el("div", "tp");
+      tp.append(starsEl(r.stars), el("span", "d", r.date));
+      c.append(tp, el("div", "w", r.word));
+      return c;
+    }));
+  } catch (e) {
+    if (e.status === 404) state($("revs"), "التاجر ده مش موجود على <b>PRIVEX</b>.<br>جرّب تبحث عنه بالاسم.");
+    else state($("revs"), "حصلت مشكلة في التحميل، جرّب تاني.");
+  }
+}
+
+function home(push) {
+  document.title = "PRIVEX | تقييمات التجار";
+  showView("home");
+  if (push) history.pushState({}, "", location.pathname);
+  search($("q").value);
+}
+
+/* ---------- الأحداث والتوجيه ---------- */
+$("backBtn").onclick = () => home(true);
+$("otherBtn").onclick = () => { $("q").value = ""; home(true); setTimeout(() => $("q").focus(), 50); };
+if (tg && tg.BackButton) tg.BackButton.onClick(() => home(true));
+let timer;
+$("q").addEventListener("input", e => { clearTimeout(timer); timer = setTimeout(() => search(e.target.value), 250); });
+window.addEventListener("popstate", route);
+
+function route() {
+  const p = new URLSearchParams(location.search);
+  const key = p.get("m") || p.get("u");
+  if (key) open(key, false);
+  else {
+    // التطبيق المصغّر ممكن يبعت start_param = معرّف التاجر
+    const sp = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param;
+    if (sp && !route.done) { route.done = true; open(sp, true); return; }
+    home(false);
+  }
+}
+route();
+</script>
+</body>
+</html>
