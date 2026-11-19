@@ -512,16 +512,21 @@ function vfFail(title, sub) {
   hap("n", "error");
 }
 async function vfPost(path, body) {
-  const r = await fetch(VF_API + "/api/vf/" + path, { method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(Object.assign({ t: VF_T, initData: tg ? tg.initData : "" }, body || {})) });
+  let r;
+  try {
+    r = await fetch(VF_API + "/api/vf/" + path, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.assign({ t: VF_T, initData: tg ? tg.initData : "" }, body || {})) });
+  } catch (e) { return { _s: 0 }; }
   let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!j || typeof j !== "object") j = {};
   j._s = r.status; return j;
 }
 function vfCommonErr(r) {
   if (r._s === 403) return vfFail("افتح من تيليجرام", "لازم تفتح صفحة التحقق من زر «تحقق الآن» داخل تيليجرام."), true;
   if (r._s === 404) return vfFail("رابط غير صالح", "اطلب الانضمام للجروب مرة تانية عشان يوصلك رابط جديد."), true;
   if (r._s === 410) return vfFail("انتهت المدة", "انتهت صلاحية التحقق. اطلب الانضمام مرة تانية."), true;
-  if (r._s >= 500 || !r._s) return vfFail("حصلت مشكلة", "جرّب تاني بعد لحظات."), true;
+  if (r._s >= 500 || !r._s) return vfFail("تعذّر الاتصال بالبوت", "تأكد إن البوت شغّال وإن رابط التحقق (VERIFY_URL) هو رابط استضافة البوت نفسه، وجرّب تاني."), true;
+  if (r._s < 200 || r._s >= 300) return vfFail("تعذّر الاتصال بالبوت", "الصفحة مش متصلة بخادم البوت (كود " + r._s + "). اضبط VERIFY_URL على رابط البوت نفسه."), true;
   return false;
 }
 function renderQ(q, opts) {
@@ -597,6 +602,7 @@ async function startVerify() {
   $("vfGroup").textContent = r.title || "الجروب";
   if (r.done) return finish(r.title);
   if (r.stage >= 1) { setStep(2); return runBio(); }
+  if (!r.q || !Array.isArray(r.opts) || !r.opts.length) return vfFail("حصلت مشكلة", "ما وصلش سؤال التحقق. اطلب الانضمام مرة تانية.");
   renderQ(r.q, r.opts); setStep(1);
 }
 
