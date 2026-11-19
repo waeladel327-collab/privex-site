@@ -523,6 +523,11 @@ function vfFail(title, sub) {
 }
 /* وضع بدون خادم: الأسئلة من questions.json (الأرقام في ?i=) والنتيجة ترجع للبوت بـ sendData */
 const VF_LOCAL = !VF_API;
+function vfBack(payload) {
+  /* النتيجة بترجع للبوت برابط /start عميق (من غير خادم) */
+  const b = QS.get("b");
+  if (b && tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/" + b + "?start=" + payload);
+}
 const VF_S = { qs: null, idx: 0, fails: 0, ans: [], bio: "" };
 const VF_MAXF = 5;
 async function vfLocal(path, body) {
@@ -530,7 +535,7 @@ async function vfLocal(path, body) {
   const cur = () => S.qs[S.idx];
   const view = extra => Object.assign({ _s: 200, ok: true, q: cur().q, opts: cur().opts, idx: S.idx, total: S.qs.length, left: VF_MAXF - S.fails }, extra);
   if (path === "start") {
-    if (!tg || !tg.initData) return { _s: 403 };
+    if (!tg) return { _s: 403 };
     const idxs = (QS.get("i") || "").split(",").filter(Boolean).map(Number);
     let bank;
     try { const r = await fetch("questions.json", { cache: "no-store" }); bank = await r.json(); } catch (e) { return { _s: 500 }; }
@@ -546,13 +551,18 @@ async function vfLocal(path, body) {
     }
     S.fails++;
     if (S.fails >= VF_MAXF) {
-      try { tg.sendData(JSON.stringify({ t: VF_T, locked: 1 })); } catch (e) {}
+      vfBack("vfx_" + VF_T);
       return { _s: 200, ok: false, locked: true };
     }
     return view({ ok: false });
   }
   if (path === "done") {
-    try { tg.sendData(JSON.stringify({ t: VF_T, a: S.ans, bio: body.bio })); } catch (e) { return { _s: 500 }; }
+    try {
+      const raw = VF_T + "|" + S.ans.join(",") + "|" + body.bio;
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+      const code = Array.from(new Uint8Array(buf)).map(x => x.toString(16).padStart(2, "0")).join("").slice(0, 16);
+      vfBack("vf_" + VF_T + "_" + code);
+    } catch (e) { return { _s: 500 }; }
     return { _s: 200, ok: true, done: true, title: QS.get("g") || "الجروب" };
   }
   return { _s: 404 };
