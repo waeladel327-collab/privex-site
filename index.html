@@ -521,7 +521,44 @@ function vfFail(title, sub) {
   $("vfErr").classList.remove("hidden"); $("errTitle").textContent = title; $("errSub").textContent = sub;
   hap("n", "error");
 }
+/* وضع بدون خادم: الأسئلة من questions.json (الأرقام في ?i=) والنتيجة ترجع للبوت بـ sendData */
+const VF_LOCAL = !VF_API;
+const VF_S = { qs: null, idx: 0, fails: 0, ans: [], bio: "" };
+const VF_MAXF = 5;
+async function vfLocal(path, body) {
+  const S = VF_S;
+  const cur = () => S.qs[S.idx];
+  const view = extra => Object.assign({ _s: 200, ok: true, q: cur().q, opts: cur().opts, idx: S.idx, total: S.qs.length, left: VF_MAXF - S.fails }, extra);
+  if (path === "start") {
+    if (!tg || !tg.initData) return { _s: 403 };
+    const idxs = (QS.get("i") || "").split(",").filter(Boolean).map(Number);
+    let bank;
+    try { const r = await fetch("questions.json", { cache: "no-store" }); bank = await r.json(); } catch (e) { return { _s: 500 }; }
+    if (!idxs.length || String(bank.length) !== QS.get("n") || idxs.some(i => !bank[i])) return { _s: 410 };
+    S.qs = idxs.map(i => bank[i]);
+    return view({ title: QS.get("g") || "الجروب", stage: 0 });
+  }
+  if (path === "answer") {
+    if (Number(body.a) === cur().ans) {
+      S.ans.push(Number(body.a)); S.idx++;
+      if (S.idx >= S.qs.length) { S.idx = S.qs.length - 1; return { _s: 200, ok: true, stage: 1 }; }
+      return view({ stage: 0 });
+    }
+    S.fails++;
+    if (S.fails >= VF_MAXF) {
+      try { tg.sendData(JSON.stringify({ t: VF_T, locked: 1 })); } catch (e) {}
+      return { _s: 200, ok: false, locked: true };
+    }
+    return view({ ok: false });
+  }
+  if (path === "done") {
+    try { tg.sendData(JSON.stringify({ t: VF_T, a: S.ans, bio: body.bio })); } catch (e) { return { _s: 500 }; }
+    return { _s: 200, ok: true, done: true, title: QS.get("g") || "الجروب" };
+  }
+  return { _s: 404 };
+}
 async function vfPost(path, body) {
+  if (VF_LOCAL) return vfLocal(path, body || {});
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), 10000);
   let r;
@@ -540,7 +577,7 @@ function vfCommonErr(r) {
   if (r._s === 403) return vfFail("افتح من تيليجرام", "لازم تفتح صفحة التحقق من زر «تحقق الآن» داخل تيليجرام."), true;
   if (r._s === 404) return vfFail("رابط غير صالح", "اطلب الانضمام للجروب مرة تانية عشان يوصلك رابط جديد."), true;
   if (r._s === 410) return vfFail("انتهت المدة", "انتهت صلاحية التحقق. اطلب الانضمام مرة تانية."), true;
-  if (r._s >= 500 || !r._s) return vfFail("تعذّر الاتصال بالبوت", "تأكد إن البوت شغّال وإن رابط التحقق (VERIFY_URL) هو رابط استضافة البوت نفسه، وجرّب تاني."), true;
+  if (r._s >= 500 || !r._s) return vfFail("تعذّر الاتصال بالبوت", "تأكد إن questions.json مرفوع جنب الصفحة، وجرّب تاني."), true;
   if (r._s < 200 || r._s >= 300) return vfFail("تعذّر الاتصال بالبوت", "الصفحة مش متصلة بخادم البوت (كود " + r._s + "). اضبط VERIFY_URL على رابط البوت نفسه."), true;
   return false;
 }
