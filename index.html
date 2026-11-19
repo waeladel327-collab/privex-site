@@ -529,7 +529,7 @@ function vfBack(payload) {
   if (b && tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/" + b + "?start=" + payload);
 }
 const VF_S = { qs: null, idx: 0, fails: 0, ans: [], bio: "" };
-const VF_MAXF = 5;
+const VF_MAXF = 3;   /* محاولات السؤال الواحد */
 async function vfLocal(path, body) {
   const S = VF_S;
   const cur = () => S.qs[S.idx];
@@ -545,7 +545,7 @@ async function vfLocal(path, body) {
   }
   if (path === "answer") {
     if (Number(body.a) === cur().ans) {
-      S.ans.push(Number(body.a)); S.idx++;
+      S.ans.push(Number(body.a)); S.idx++; S.fails = 0;
       if (S.idx >= S.qs.length) { S.idx = S.qs.length - 1; return { _s: 200, ok: true, stage: 1 }; }
       return view({ stage: 0 });
     }
@@ -591,9 +591,11 @@ function vfCommonErr(r) {
   if (r._s < 200 || r._s >= 300) return vfFail("تعذّر الاتصال بالبوت", "الصفحة مش متصلة بخادم البوت (كود " + r._s + "). اضبط VERIFY_URL على رابط البوت نفسه."), true;
   return false;
 }
-function renderQ(q, opts, idx, total) {
+function renderQ(q, opts, idx, total, left) {
   $("vfQ").textContent = q;
-  if (total) { $("vfMsg").className = "vf-msg"; $("vfMsg").textContent = "السؤال " + (idx + 1) + " من " + total; }
+  $("vfMsg").className = "vf-msg";
+  if (total > 1) $("vfMsg").textContent = "السؤال " + (idx + 1) + " من " + total;
+  else $("vfMsg").textContent = left ? "المحاولات المتاحة: " + left : "";
   $("vfOpts").replaceChildren(...opts.map(v => {
     const b = el("button", "opt", String(v));
     b.onclick = () => pick(b, v);
@@ -606,20 +608,21 @@ async function pick(btn, v) {
   const r = await vfPost("answer", { a: v });
   if (vfCommonErr(r)) return;
   if (r.locked) {
-    vfFail("تم رفض الطلب", "محاولات خاطئة كثيرة. اطلب الانضمام من جديد لاحقاً.");
+    vfFail("انتهت المحاولات", "٣ محاولات خاطئة في نفس السؤال. اتقفل طلبك، ابعت طلب انضمام جديد للجروب وابدأ من الأول.");
+    setTimeout(() => { try { tg.close(); } catch (e) {} }, 1800);
   } else if (r.ok && r.stage >= 1) {
-    // خلص الـ 20 سؤال: ننتقل للبصمة
+    // خلّص الأسئلة: ننتقل للبصمة
     btn.classList.add("good"); hap("n", "success");
     setTimeout(() => { setStep(2); busy = false; runBio(); }, 550);
   } else if (r.ok) {
     // إجابة صح: السؤال اللي بعده
     btn.classList.add("good"); hap("n", "success");
-    setTimeout(() => { renderQ(r.q, r.opts, r.idx, r.total); busy = false; }, 450);
+    setTimeout(() => { renderQ(r.q, r.opts, r.idx, r.total, r.left); busy = false; }, 450);
   } else {
     // إجابة غلط: نفس السؤال تاني
     btn.classList.add("bad"); hap("n", "error");
     setTimeout(() => {
-      renderQ(r.q, r.opts, r.idx, r.total); busy = false;
+      renderQ(r.q, r.opts, r.idx, r.total, r.left); busy = false;
       $("vfMsg").className = "vf-msg err"; $("vfMsg").textContent = "إجابة خاطئة — المحاولات المتبقية: " + r.left;
     }, 650);
   }
@@ -679,7 +682,7 @@ async function startVerifyInner() {
   if (r.done) return finish(r.title);
   if (r.stage >= 1) { setStep(2); return runBio(); }
   if (!r.q || !Array.isArray(r.opts) || !r.opts.length) return vfFail("حصلت مشكلة", "ما وصلش سؤال التحقق. اطلب الانضمام مرة تانية.");
-  renderQ(r.q, r.opts, r.idx, r.total); setStep(1);
+  renderQ(r.q, r.opts, r.idx, r.total, r.left); setStep(1);
 }
 
 function route() {
