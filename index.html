@@ -257,7 +257,7 @@
 
     <div class="vf-card" id="vfStep1">
       <div class="qlabel">اختر الإجابة الصحيحة</div>
-      <div class="qtext" id="vfQ">…</div>
+      <div class="qtext" id="vfQ" style="font-size:22px">جاري تحميل السؤال…</div>
       <div class="opts" id="vfOpts"></div>
       <div class="vf-msg" id="vfMsg"></div>
     </div>
@@ -496,6 +496,16 @@ setInterval(() => {
 /* ═════════ وضع التحقق ═════════ */
 const QS = new URLSearchParams(location.search);
 const VF_T = QS.get("v");
+window.addEventListener("error", ev => { if (VF_T) vfShowErr("خطأ في الصفحة", String(ev.message || ev.error || "")); });
+window.addEventListener("unhandledrejection", ev => { if (VF_T) vfShowErr("خطأ في الصفحة", String((ev.reason && ev.reason.message) || ev.reason || "")); });
+function vfShowErr(title, sub) {
+  try {
+    ["vfStep1", "vfStep2", "vfStep3"].forEach(id => { const x = document.getElementById(id); if (x) x.classList.add("hidden"); });
+    document.getElementById("vfErr").classList.remove("hidden");
+    document.getElementById("errTitle").textContent = title;
+    document.getElementById("errSub").textContent = sub + " — جرّب تقفل التطبيق وتفتحه تاني من زر تحقق الآن.";
+  } catch (e) {}
+}
 const VF_API = (QS.get("api") || "").replace(/\/$/, "");
 const hap = (k, v) => { try { tg.HapticFeedback && (k === "n" ? tg.HapticFeedback.notificationOccurred(v) : tg.HapticFeedback.impactOccurred(v)); } catch (e) {} };
 function setStep(n) {
@@ -519,13 +529,14 @@ async function vfPost(path, body) {
     r = await fetch(VF_API + "/api/vf/" + path, { method: "POST", headers: { "Content-Type": "application/json" },
       signal: ctl.signal,
       body: JSON.stringify(Object.assign({ t: VF_T, initData: tg ? tg.initData : "" }, body || {})) });
-  } catch (e) { clearTimeout(timer); return { _s: 0 }; }
+  } catch (e) { clearTimeout(timer); return { _s: 0, _e: String(e && e.name || e) }; }
   clearTimeout(timer);
   let j = {}; try { j = await r.json(); } catch (e) {}
   if (!j || typeof j !== "object") j = {};
   j._s = r.status; return j;
 }
 function vfCommonErr(r) {
+  if (r._s === 0) return vfFail("تعذّر الاتصال بالبوت", "الطلب ما وصلش للبوت (" + (r._e || "انتهت المهلة") + "). افتح رابط /api/vf/ping من المتصفح عشان نتأكد."), true;
   if (r._s === 403) return vfFail("افتح من تيليجرام", "لازم تفتح صفحة التحقق من زر «تحقق الآن» داخل تيليجرام."), true;
   if (r._s === 404) return vfFail("رابط غير صالح", "اطلب الانضمام للجروب مرة تانية عشان يوصلك رابط جديد."), true;
   if (r._s === 410) return vfFail("انتهت المدة", "انتهت صلاحية التحقق. اطلب الانضمام مرة تانية."), true;
@@ -602,6 +613,9 @@ function finish(title) {
 $("bioRetry").onclick = runBio;
 $("bioSettings").onclick = () => { try { bm().openSettings(); } catch (e) {} };
 async function startVerify() {
+  try { await startVerifyInner(); } catch (e) { vfShowErr("خطأ في الصفحة", String(e && e.message || e)); }
+}
+async function startVerifyInner() {
   document.body.classList.add("vf");
   document.title = "PRIVEX | التحقق";
   const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = "#020a10";
@@ -610,7 +624,9 @@ async function startVerify() {
   document.querySelector(".tag").textContent = "التحقق الآمن";
   $("foot").textContent = "𝐏𝐑𝐈𝐕𝐄𝐗 ⌯ 𝐀𝐈 · SECURE VERIFICATION";
   if (tg && tg.setHeaderColor) { try { tg.setHeaderColor("#020a10"); tg.setBackgroundColor("#020a10"); } catch (e) {} }
+  $("vfMsg").className = "vf-msg"; $("vfMsg").textContent = "جاري الاتصال بالبوت…";
   const r = await vfPost("start");
+  $("vfMsg").textContent = "";
   if (vfCommonErr(r)) return;
   $("vfGroup").textContent = r.title || "الجروب";
   if (r.done) return finish(r.title);
