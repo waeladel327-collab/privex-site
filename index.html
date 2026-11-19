@@ -103,6 +103,69 @@
     background:transparent;color:var(--gold-lt);font:inherit;font-size:15px;cursor:pointer}
   .other:hover{border-color:var(--gold-lt)}
   .foot{text-align:center;color:#6f6240;font-size:12px;margin-top:30px;letter-spacing:2px}
+
+  /* ═════════ وضع التحقق (ألوان مختلفة: زمردي/سيان على أزرق ليلي) ═════════ */
+  body.vf{
+    --bg:#020a10;--card:#071722;--card2:#0a2230;--line:#0f3b4d;
+    --txt:#eafcf8;--sub:#7fa9a8;--gold:#19e3b1;--gold-lt:#7dffe0;--gold-dk:#0c6b60;
+    --ok:#19e3b1;--bad:#ff5d73;
+    background:
+      radial-gradient(800px 480px at 105% -10%,rgba(25,227,177,.20),transparent 60%),
+      radial-gradient(700px 420px at -10% 105%,rgba(56,140,255,.20),transparent 60%),
+      linear-gradient(rgba(25,227,177,.04) 1px,transparent 1px) 0 0/34px 34px,
+      linear-gradient(90deg,rgba(25,227,177,.04) 1px,transparent 1px) 0 0/34px 34px,
+      var(--bg);
+  }
+  body.vf .brand{color:var(--gold-lt)}
+  .vf-hero{text-align:center;padding:26px 0 6px}
+  .shield{width:104px;height:104px;margin:0 auto 14px;position:relative;filter:drop-shadow(0 8px 26px rgba(25,227,177,.45));animation:float 4s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-6px)}}
+  .vf-hero h1{margin:0 0 8px;font-size:27px;background:linear-gradient(90deg,#7dffe0,#6aa8ff,#7dffe0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .vf-hero p{margin:0 auto;color:var(--sub);font-size:15px;line-height:1.8;max-width:380px}
+  .vf-hero p b{color:var(--gold-lt)}
+  .steps{display:flex;align-items:center;justify-content:center;gap:0;margin:20px 0 16px}
+  .st{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--sub);width:74px}
+  .st i{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;
+    border:2px solid var(--line);background:var(--card);color:var(--sub);transition:.3s}
+  .st.on i{border-color:var(--gold);color:var(--gold-lt);box-shadow:0 0 0 5px rgba(25,227,177,.15)}
+  .st.on{color:var(--gold-lt)}
+  .st.ok i{background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));border-color:var(--gold-lt);color:#02140f}
+  .ln{height:2px;width:34px;background:var(--line);margin-bottom:20px;border-radius:2px}
+  .ln.ok{background:var(--gold)}
+  .vf-card{position:relative;border-radius:24px;padding:22px 18px;border:1px solid var(--line);overflow:hidden;
+    background:linear-gradient(160deg,rgba(10,34,48,.92),rgba(5,16,24,.95));
+    box-shadow:0 18px 50px rgba(0,0,0,.45),inset 0 1px 0 rgba(125,255,224,.08);animation:rise .4s ease}
+  .vf-card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),#6aa8ff,transparent)}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .qlabel{text-align:center;color:var(--sub);font-size:13px;letter-spacing:1px}
+  .qtext{text-align:center;direction:ltr;font-size:44px;font-weight:700;margin:10px 0 20px;color:var(--gold-lt);
+    text-shadow:0 0 24px rgba(25,227,177,.45);letter-spacing:2px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .opt{padding:18px 0;border-radius:16px;border:1.5px solid var(--line);background:linear-gradient(160deg,var(--card2),var(--card));
+    color:var(--txt);font:inherit;font-size:26px;font-weight:700;cursor:pointer;direction:ltr;transition:.15s}
+  .opt:active{transform:scale(.96)}
+  .opt:hover{border-color:var(--gold)}
+  .opt.good{border-color:var(--ok);background:rgba(25,227,177,.16);color:var(--gold-lt);box-shadow:0 0 22px rgba(25,227,177,.35)}
+  .opt.bad{border-color:var(--bad);background:rgba(255,93,115,.14);color:#ff9aa9;animation:shake .4s}
+  @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  .vf-msg{min-height:22px;text-align:center;margin-top:14px;font-size:14px;color:var(--sub)}
+  .vf-msg.err{color:#ff9aa9}
+  .bio{width:132px;height:132px;margin:6px auto 14px;position:relative;display:flex;align-items:center;justify-content:center;color:var(--gold-lt)}
+  .bio svg{width:70px;height:70px;position:relative;z-index:2}
+  .bio::before,.bio::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--gold);opacity:0;animation:ring 2.2s infinite}
+  .bio::after{animation-delay:1.1s}
+  @keyframes ring{0%{transform:scale(.55);opacity:.7}100%{transform:scale(1.15);opacity:0}}
+  .bio .core{position:absolute;inset:22px;border-radius:50%;background:radial-gradient(circle,rgba(25,227,177,.22),rgba(25,227,177,.04));border:1px solid var(--gold-dk)}
+  .vf-title{text-align:center;font-size:19px;font-weight:700;margin-bottom:6px}
+  .vf-sub{text-align:center;color:var(--sub);font-size:14px;line-height:1.8}
+  .vf-btn{display:block;width:100%;margin-top:16px;padding:15px;border-radius:14px;border:none;font:inherit;font-size:16px;font-weight:700;cursor:pointer;
+    color:#02140f;background:linear-gradient(135deg,var(--gold-lt),var(--gold));box-shadow:0 8px 24px rgba(25,227,177,.3)}
+  .vf-btn.ghost{background:transparent;color:var(--gold-lt);border:1.5px solid var(--gold-dk);box-shadow:none;margin-top:10px}
+  .done-mark{width:96px;height:96px;margin:4px auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));box-shadow:0 0 0 8px rgba(25,227,177,.12),0 0 40px rgba(25,227,177,.5);animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+  .done-mark svg{width:48px;height:48px}
+  .vf-badge{display:inline-block;margin-top:14px;padding:7px 16px;border-radius:999px;border:1px solid var(--gold-dk);color:var(--gold-lt);font-size:13px;letter-spacing:1px;background:rgba(25,227,177,.07)}
   .hidden{display:none!important}
 </style>
 </head>
@@ -173,7 +236,62 @@
     <button class="other" id="otherBtn">🔍 ابحث عن تاجر آخر</button>
   </div>
 
-  <div class="foot">PRIVEX · PRIVEX · PRIVEX</div>
+
+  <!-- ═════════ وضع التحقق ═════════ -->
+  <div id="vfView" class="hidden">
+    <div class="vf-hero">
+      <svg class="shield" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dffe0"/><stop offset="1" stop-color="#2f7bff"/></linearGradient></defs>
+        <path d="M60 6 104 22v34c0 29-18 48-44 58C34 104 16 85 16 56V22Z" fill="#06202b" stroke="url(#sg)" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M60 18 92 30v26c0 22-13 36-32 44-19-8-32-22-32-44V30Z" fill="none" stroke="#19e3b1" stroke-opacity=".45" stroke-width="2"/>
+        <path d="M42 60l13 13 25-27" fill="none" stroke="url(#sg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h1>التحقق من الهوية</h1>
+      <p id="vfSub">للانضمام إلى <b id="vfGroup">الجروب</b> أكمل الخطوتين التاليتين.</p>
+    </div>
+    <div class="steps">
+      <div class="st on" id="s1"><i>1</i>المسألة</div><div class="ln" id="l1"></div>
+      <div class="st" id="s2"><i>2</i>البصمة</div><div class="ln" id="l2"></div>
+      <div class="st" id="s3"><i>3</i>تم</div>
+    </div>
+
+    <div class="vf-card" id="vfStep1">
+      <div class="qlabel">اختر الإجابة الصحيحة</div>
+      <div class="qtext" id="vfQ">…</div>
+      <div class="opts" id="vfOpts"></div>
+      <div class="vf-msg" id="vfMsg"></div>
+    </div>
+
+    <div class="vf-card hidden" id="vfStep2">
+      <div class="bio">
+        <div class="core"></div>
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <path d="M32 10c-12 0-21 9-21 21v6"/><path d="M32 10c12 0 21 9 21 21 0 6-1 10-3 14"/>
+          <path d="M32 18c-8 0-14 6-14 14v7c0 3-1 6-3 9"/><path d="M32 18c8 0 14 6 14 14 0 6-1 11-4 16"/>
+          <path d="M32 26c-4 0-7 3-7 7v6c0 4-1 8-3 11"/><path d="M32 26c4 0 7 3 7 7 0 7-1 12-4 18"/>
+          <path d="M32 34v8c0 4-1 8-2 11"/>
+        </svg>
+      </div>
+      <div class="vf-title">أكّد ببصمتك</div>
+      <div class="vf-sub" id="bioSub">ضع إصبعك على مستشعر البصمة في هاتفك.</div>
+      <button class="vf-btn hidden" id="bioRetry">إعادة المحاولة</button>
+      <button class="vf-btn ghost hidden" id="bioSettings">فتح إعدادات البصمة</button>
+    </div>
+
+    <div class="vf-card hidden" id="vfStep3" style="text-align:center">
+      <div class="done-mark"><svg viewBox="0 0 48 48" fill="none" stroke="#02140f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 25l10 10 19-21"/></svg></div>
+      <div class="vf-title" id="okTitle">تم التحقق بنجاح</div>
+      <div class="vf-sub">تمت الموافقة على دخولك. ارجع للتليجرام 🎉</div>
+      <span class="vf-badge">تم التحقق من خلال 𝐏𝐑𝐈𝐕𝐄𝐗 ⌯ 𝐀𝐈</span>
+    </div>
+
+    <div class="vf-card hidden" id="vfErr" style="text-align:center">
+      <div class="vf-title" id="errTitle">تعذّر التحقق</div>
+      <div class="vf-sub" id="errSub"></div>
+    </div>
+  </div>
+
+  <div class="foot" id="foot">PRIVEX · PRIVEX · PRIVEX</div>
 </div>
 
 <script>
@@ -369,10 +487,118 @@ $("q").addEventListener("input", e => { clearTimeout(timer); timer = setTimeout(
 window.addEventListener("popstate", route);
 /* تحديث تلقائي كل 15 ثانية والصفحة مفتوحة */
 setInterval(() => {
-  if (document.hidden) return;
+  if (document.hidden || VF_T) return;
   if (!$("merchantView").classList.contains("hidden")) { if (curKey) open(curKey, false, true); }
   else search($("q").value);
 }, 15000);
+
+
+/* ═════════ وضع التحقق ═════════ */
+const QS = new URLSearchParams(location.search);
+const VF_T = QS.get("v");
+const VF_API = (QS.get("api") || "").replace(/\/$/, "");
+const hap = (k, v) => { try { tg.HapticFeedback && (k === "n" ? tg.HapticFeedback.notificationOccurred(v) : tg.HapticFeedback.impactOccurred(v)); } catch (e) {} };
+function setStep(n) {
+  [1, 2, 3].forEach(i => {
+    $("s" + i).className = "st" + (i < n ? " ok" : i === n ? " on" : "");
+    $("s" + i).querySelector("i").textContent = i < n ? "✓" : String(i);
+  });
+  $("l1").className = "ln" + (n > 1 ? " ok" : ""); $("l2").className = "ln" + (n > 2 ? " ok" : "");
+  ["vfStep1", "vfStep2", "vfStep3", "vfErr"].forEach((id, k) => $(id).classList.toggle("hidden", k !== n - 1));
+}
+function vfFail(title, sub) {
+  ["vfStep1", "vfStep2", "vfStep3"].forEach(id => $(id).classList.add("hidden"));
+  $("vfErr").classList.remove("hidden"); $("errTitle").textContent = title; $("errSub").textContent = sub;
+  hap("n", "error");
+}
+async function vfPost(path, body) {
+  const r = await fetch(VF_API + "/api/vf/" + path, { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.assign({ t: VF_T, initData: tg ? tg.initData : "" }, body || {})) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  j._s = r.status; return j;
+}
+function vfCommonErr(r) {
+  if (r._s === 403) return vfFail("افتح من تيليجرام", "لازم تفتح صفحة التحقق من زر «تحقق الآن» داخل تيليجرام."), true;
+  if (r._s === 404) return vfFail("رابط غير صالح", "اطلب الانضمام للجروب مرة تانية عشان يوصلك رابط جديد."), true;
+  if (r._s === 410) return vfFail("انتهت المدة", "انتهت صلاحية التحقق. اطلب الانضمام مرة تانية."), true;
+  if (r._s >= 500 || !r._s) return vfFail("حصلت مشكلة", "جرّب تاني بعد لحظات."), true;
+  return false;
+}
+function renderQ(q, opts) {
+  $("vfQ").textContent = q;
+  $("vfOpts").replaceChildren(...opts.map(v => {
+    const b = el("button", "opt", String(v));
+    b.onclick = () => pick(b, v);
+    return b;
+  }));
+}
+let busy = false;
+async function pick(btn, v) {
+  if (busy) return; busy = true; hap("i", "light");
+  const r = await vfPost("answer", { a: v });
+  if (vfCommonErr(r)) return;
+  if (r.ok) {
+    btn.classList.add("good"); hap("n", "success");
+    setTimeout(() => { setStep(2); busy = false; runBio(); }, 550);
+  } else if (r.locked) {
+    vfFail("تم رفض الطلب", "محاولات خاطئة كثيرة. اطلب الانضمام من جديد لاحقاً.");
+  } else {
+    btn.classList.add("bad"); hap("n", "error");
+    $("vfMsg").className = "vf-msg err"; $("vfMsg").textContent = "إجابة خاطئة — المحاولات المتبقية: " + r.left;
+    setTimeout(() => { renderQ(r.q, r.opts); busy = false; }, 650);
+  }
+}
+const bm = () => tg && tg.BiometricManager;
+const bioInit = () => new Promise(res => { const b = bm(); if (!b) return res(null); if (b.isInited) return res(b); b.init(() => res(b)); });
+async function bioCheck() {
+  const b = await bioInit();
+  if (!b || !b.isBiometricAvailable) return "unavailable";
+  if (!b.isAccessGranted) {
+    const g = await new Promise(res => b.requestAccess({ reason: "تأكيد هويتك للانضمام عبر PRIVEX" }, res));
+    if (!g) return "denied";
+  }
+  return new Promise(res => b.authenticate({ reason: "ضع بصمتك للتحقق" }, ok => res(ok ? "ok" : "failed")));
+}
+async function runBio() {
+  $("bioRetry").classList.add("hidden"); $("bioSettings").classList.add("hidden");
+  $("bioSub").textContent = "ضع إصبعك على مستشعر البصمة في هاتفك.";
+  const res = await bioCheck();
+  if (res === "ok" || res === "unavailable") {
+    if (res === "unavailable") $("bioSub").textContent = "جهازك لا يدعم البصمة داخل تيليجرام — جاري الإكمال…";
+    const r = await vfPost("done", { bio: res });
+    if (vfCommonErr(r)) return;
+    if (r.ok) return finish(r.title);
+    return vfFail("تعذّر إكمال الدخول", "تأكد إن البوت مشرف في الجروب وجرّب تاني.");
+  }
+  hap("n", "error");
+  $("bioSub").textContent = res === "denied" ? "لازم تسمح لـ PRIVEX باستخدام البصمة." : "فشلت البصمة، حاول مرة أخرى.";
+  $("bioRetry").classList.remove("hidden");
+  if (res === "denied" && bm() && bm().openSettings) $("bioSettings").classList.remove("hidden");
+}
+function finish(title) {
+  if (title) $("okTitle").textContent = "أهلاً بك في " + title;
+  setStep(3); $("l2").className = "ln ok"; $("s3").className = "st ok"; $("s3").querySelector("i").textContent = "✓";
+  hap("n", "success");
+  setTimeout(() => { try { tg.close(); } catch (e) {} }, 2600);
+}
+$("bioRetry").onclick = runBio;
+$("bioSettings").onclick = () => { try { bm().openSettings(); } catch (e) {} };
+async function startVerify() {
+  document.body.classList.add("vf");
+  document.title = "PRIVEX | التحقق";
+  const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = "#020a10";
+  ["homeView", "merchantView"].forEach(id => $(id).classList.add("hidden"));
+  $("vfView").classList.remove("hidden");
+  document.querySelector(".tag").textContent = "التحقق الآمن";
+  $("foot").textContent = "𝐏𝐑𝐈𝐕𝐄𝐗 ⌯ 𝐀𝐈 · SECURE VERIFICATION";
+  if (tg && tg.setHeaderColor) { try { tg.setHeaderColor("#020a10"); tg.setBackgroundColor("#020a10"); } catch (e) {} }
+  const r = await vfPost("start");
+  if (vfCommonErr(r)) return;
+  $("vfGroup").textContent = r.title || "الجروب";
+  if (r.done) return finish(r.title);
+  if (r.stage >= 1) { setStep(2); return runBio(); }
+  renderQ(r.q, r.opts); setStep(1);
+}
 
 function route() {
   const p = new URLSearchParams(location.search);
@@ -385,7 +611,7 @@ function route() {
     home(false);
   }
 }
-route();
+if (VF_T) startVerify(); else route();
 </script>
 </body>
 </html>
